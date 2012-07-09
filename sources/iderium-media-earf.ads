@@ -33,6 +33,7 @@ package Iderium.Media.Earf is
 
    overriding
    procedure Capture (Earf : in out Output);
+   pragma Inline (Capture);
 
 private
 

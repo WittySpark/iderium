@@ -23,7 +23,7 @@ package body Iderium.Media.Earf is
 
    begin
       return Instance'(Filter.Instance'(Base) with 
-        R => Sum(Base.A) / (1.0 - Sum(Base.B)));
+        R => (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
    end Create;
 
 
@@ -39,10 +39,9 @@ package body Iderium.Media.Earf is
            Earf.Edges.Sample);
          Buffer.Mix (Earf.Context.F, Earf.Context.R * Earf.Input.Sample,
            Earf.Edges.Sample);
-         Earf.Sample := Earf.Context.A(0) * Earf.Input.Sample;
-         Buffer.Dot (Earf.Context.A(1 .. Earf.Context.M), 
-           Earf.Context.I, Earf.Sample);
-         Buffer.Dot (Earf.Context.B, Earf.Context.F, Earf.Sample);
+         Earf.Sample := Earf.Context.A * Earf.Input.Sample;
+         Buffer.Dot (Earf.Context.B, Earf.Context.I, Earf.Sample);
+         Buffer.Dot (Earf.Context.C, Earf.Context.F, Earf.Sample);
          Buffer.Push (Earf.Context.I, Earf.Input.Sample);
          Buffer.Push (Earf.Context.F, Earf.Sample);
       end if;

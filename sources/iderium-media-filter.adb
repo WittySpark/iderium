@@ -37,14 +37,16 @@ package body Iderium.Media.Filter is
          Data : Buffer_Data renames Buffer.Data;
          Current : Integer renames Buffer.Current;
       begin
-         if Current < Data'First then
-            -- We need to shift the buffer manually.
-            Data(1 .. Buffer.Size) := 
-              Data(Current + 1 .. Current + Buffer.Size);
-            Current := 0;
+         if Data'Length > 0 then
+            if Current < Data'First then
+               -- We need to shift the buffer manually.
+               Data(2 .. Buffer.Size) := 
+                 Data(Current + 1 .. Current + Buffer.Size - 1);
+               Current := 1;
+            end if;
+            Data(Current) := Sample;
+            Current := Current - 1;
          end if;
-         Data(Current) := Sample;
-         Current := Current - 1;
       end Push;
 
       ------------------------------------------------------------------
