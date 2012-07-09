@@ -1,0 +1,36 @@
+with Ada.Text_IO;
+with Iderium.Resource;
+
+procedure Demo is
+
+   type String_Access is access String;
+
+   package String_Resource is
+     new Iderium.Resource (String, String_Access);
+
+   -- Empty resource.
+   R0 : String_Resource.Instance;
+
+   -- `R1` has only one user.
+   R1 : String_Resource.Instance := 
+     String_Resource.Create (new String'("Hello, world!"));
+
+   -- `R1` and `R2` share the same string.
+   R2 : String_Resource.Instance := R1;
+
+   -- `R3` has only one user.
+   R3 : String_Resource.Instance := 
+     String_Resource.Create (new String'("To be replaced."));
+
+begin
+   -- God bless Ada's `Adjust` procedure!
+   R1 := R1;
+   -- `R3` is released. Now `R1`, `R2`, and `R3` share the same string.
+   R3 := R2;
+   -- Just in case.
+   Ada.Text_IO.Put_Line (String_Resource.Get (R1).all);
+   Ada.Text_IO.Put_Line (String_Resource.Get (R2).all);
+   Ada.Text_IO.Put_Line (String_Resource.Get (R3).all);
+   -- Two users left.
+   R1 := R0;
+end Demo;

@@ -1,0 +1,96 @@
+with Ada.Text_IO;
+with Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Generic_Real_Arrays;
+with Iderium.Media.Signal;
+with Iderium.Media.Filter;
+with Iderium.Media.Earf;
+
+procedure Demo is
+
+   -- This time we work with floating point signals.
+   package Signal is
+     new Iderium.Media.Signal (Float);
+
+   -- Exponentially fading sine wave.
+   type Wave is new Signal.Instance with
+      record
+         X : Float := 0.0;
+      end record;
+
+   -- Quite simple.
+   overriding
+   procedure Capture (W : in out Wave) is
+      use Ada.Numerics.Elementary_Functions;
+   begin
+      W.X := W.X + 0.1;
+      W.Active := W.X < 10.0;
+      if W.Active then
+         W.Sample := Exp(-0.2 * W.X) * Sin(W.X) + 
+           0.1 * Sin(10.0 * W.X);
+      end if;
+   end Capture;
+
+
+   package Arrays is
+     new Ada.Numerics.Generic_Real_Arrays (Float);
+
+   package Simple_Filter is new Iderium.Media.Filter (Arrays => Arrays,
+                                                      Signal => Signal,
+                                                  Input_Type => Wave);
+
+
+   -- Edge-stopping function.
+   type Fading is new Signal.Instance with
+      record
+         X : Float := 0.0;
+      end record;
+
+   -- Notice, this signal is infinite-length!
+   -- But we don't care, since EARF stops when the input stops.
+   overriding
+   procedure Capture (F : in out Fading) is
+      use Ada.Numerics.Elementary_Functions;
+   begin
+      F.Sample := Exp (-0.5 * F.X);
+      F.X := F.X + 0.1;
+   end Capture;
+
+
+   package Simple_Earf is
+     new Iderium.Media.Earf (Filter => Simple_Filter,
+                        Real_Signal => Signal,
+                         Edges_Type => Fading);
+
+
+   procedure Print (S : in out Signal.Instance'Class) is
+   begin
+      loop
+         Signal.Capture (S);
+         exit when not S.Active;
+         Ada.Text_IO.Put_Line (S.Sample'Img);
+      end loop;
+   end Print;
+
+
+   Input : aliased Wave;
+   Edges : aliased Fading;
+
+   -- A non-linear first-order recursive filter.
+   Alpha : constant := 0.05;
+   Example : aliased Simple_Earf.Instance := 
+     Simple_Earf.Create (
+       Simple_Filter.Instance'(M => 0,
+                               N => 1,
+                        Capacity => 10,
+                               A => (0 => Alpha),
+                               B => (1 => 1.0 - Alpha),
+                          others => <>)
+     );
+
+   Example_Output : Simple_Earf.Output (Example'Access, 
+                                          Input'Access, 
+                                          Edges'Access);
+
+begin
+   Print (Example_Output);
+end Demo;

@@ -1,0 +1,67 @@
+with Ada.Text_IO;
+with Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Generic_Real_Arrays;
+with Iderium.Media.Signal;
+with Iderium.Media.Filter;
+
+procedure Demo is
+
+   -- This time we work with floating point signals.
+   package Signal is
+     new Iderium.Media.Signal (Float);
+
+   -- Exponentially fading sine wave.
+   type Wave is new Signal.Instance with
+      record
+         X : Float := 0.0;
+      end record;
+
+   -- Quite simple.
+   overriding
+   procedure Capture (W : in out Wave) is
+      use Ada.Numerics.Elementary_Functions;
+   begin
+      W.X := W.X + 0.1;
+      W.Active := W.X < 10.0;
+      if W.Active then
+         W.Sample := Exp (-0.2 * W.X) * Sin (W.X) + 
+           0.1 * Sin (10.0 * W.X);
+      end if;
+   end Capture;
+
+
+   package Arrays is new Ada.Numerics.Generic_Real_Arrays (Float);
+
+   package Simple_Filter is new Iderium.Media.Filter (Arrays => Arrays,
+                                                      Signal => Signal,
+                                                  Input_Type => Wave);
+
+   procedure Print (S : in out Signal.Instance'Class) is
+   begin
+      loop
+         Signal.Capture (S);
+         exit when not S.Active;
+         Ada.Text_IO.Put_Line (S.Sample'Img);
+      end loop;
+   end Print;
+
+
+   Input : aliased Wave;
+
+   -- A simple first-order recursive filter:
+   --   out = alpha * in + (1 - alpha) * prev.
+   Alpha : constant := 0.1;
+   Example : aliased Simple_Filter.Instance := (M => 0,
+                                                N => 1,
+                                         Capacity => 10,
+                                                A => (0 => Alpha),
+                                                B => (1 => 1.0 - Alpha),
+                                           others => <>);
+
+   Example_Output : Simple_Filter.Output (Example'Access, Input'Access);
+
+begin
+   Simple_Filter.Buffer.Fill (Example.I, 0.0);
+   Simple_Filter.Buffer.Fill (Example.F, 0.0);
+   Print (Example_Output);
+end Demo;

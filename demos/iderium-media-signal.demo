@@ -1,0 +1,61 @@
+with Ada.Text_IO;
+with Ada.Numerics.Elementary_Functions;
+with Iderium.Media.Signal;
+
+procedure Demo is
+
+   -- Instantiate a new package first.
+   package Positive_Signal is
+     new Iderium.Media.Signal (Sample_Type => Positive);
+
+   -- Derive a new signal type.
+   -- This signal will contain only prime numbers.
+   type Prime_Signal is
+     new Positive_Signal.Instance with null record;
+
+   -- Implement the `Capture` procedure for the new signal type.
+   overriding
+   procedure Capture (Signal : in out Prime_Signal) is
+      -- Let's make some names a bit shorter.
+      N : Positive renames Signal.Sample;
+      use Ada.Numerics.Elementary_Functions;
+      -- We definitely need a flag.
+      Prime : Boolean;
+   begin
+      loop
+         -- Go to the next number.
+         N := N + 1;
+         -- Assume it to be prime.
+         Prime := True;
+         -- For all possible dividers.
+         for Divider in 2 .. Positive (Sqrt (Float (N))) loop
+            Prime := N rem Divider /= 0;
+            -- Definitely not prime.
+            exit when not Prime;
+         end loop;
+         -- Is N prime?
+         exit when Prime;
+      end loop;
+      -- We stop when N becomes greater then 1000.
+      Signal.Active := N < 1000;
+   end Capture;
+
+   -- This procedure demonstrates usage of a signal.
+   procedure Print (Signal : in out Positive_Signal.Instance'Class) is
+   begin
+      loop
+         -- Capture the next sample first.
+         -- This will update `Active` and `Sample` fields.
+         Positive_Signal.Capture (Signal);
+         exit when not Signal.Active;
+         Ada.Text_IO.Put_Line (Signal.Sample'Img);
+      end loop;
+   end Print;
+
+   -- We can start from any positive number.
+   S : Prime_Signal := (Sample => 1, others => <>);
+
+begin
+   -- God bless dynamic dispatching.
+   Print (S);
+end Demo;

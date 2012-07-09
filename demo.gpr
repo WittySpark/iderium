@@ -1,0 +1,8 @@
+with "iderium.gpr";
+
+project Demo is
+   for Source_Dirs use (".");
+   for Object_Dir  use "rubbish";
+   for Exec_Dir    use ".";
+   for Main        use ("demo.adb");
+end Demo;
