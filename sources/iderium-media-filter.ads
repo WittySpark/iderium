@@ -5,18 +5,19 @@
 --    This package provides a generic causal recursive filter interface.
 --    It works with arbitrary real types and signal types.
 -- Concept:
---    A filter takes input signal and transforms it in the form:
---      out := A(0) * in + <A(1..M), I> + <B(1..N), F>,
+--    A filter takes input signal samples and transforms them to:
+--      out := A * in + <B, I> + <C, F>,
 --    where 
 --          `out` is current output sample,
 --           `in` is current input sample, 
 --            `I` is current input buffer (last M input samples),
 --            `F` is current feedback buffer (last N output samples),
---      `A(0..M)` are input coefficients,
---      `B(1..N)` are feedback coefficients,
+--            `A` is the main coefficient,
+--            `B` are input coefficients,
+--            `C` are feedback coefficients,
 --        `<*,*>` denotes a dot-product.
---    In terms of Z-transform, filter's transfer function is given by:
---      F(z) = (\sum_{i=0}^{M} A(i) z^-i) / (\sum_{i=1}^N B(i) z^-i).
+--    The filter's transfer function (in terms of Z-transform) H(z) is
+--      (A + \sum_{i=1}^{M} B(i) z^-i) / (1 - \sum_{i=1}^N C(i) z^-i).
 ------------------------------------------------------------------------
 
 with Ada.Numerics.Generic_Real_Arrays;
@@ -24,10 +25,10 @@ with Iderium.Media.Signal;
 
 generic
 
-   -- Also defines the real type to be used by filter.
+   -- Also defines a real type to be used by filter.
    with package Arrays is new Ada.Numerics.Generic_Real_Arrays (<>);
 
-   -- Also defines the sample type to be used by filter.
+   -- Also defines a sample type to be used by filter.
    with package Signal is new Iderium.Media.Signal (<>);
 
    -- This operation must be defined on samples.
@@ -39,19 +40,19 @@ generic
                      Right : Signal.Sample_Type)
      return Signal.Sample_Type is <>;
 
-   -- A concrete input signal type.
+   -- A concrete input signal type to work with.
    type Input_Type is new Signal.Instance with private;
+
+   -- The more `Buffer_Capacity` is, the longer `Push` works fast,
+   -- and the more memory is used.
+   Buffer_Capacity : Natural := 0;
 
 package Iderium.Media.Filter is
 
-   -- Allows you to control a filter's buffer.
    package Buffer is
 
       -- It works as a sliding vector of length `Size`.
-      -- `Capacity` should be comparable to the length of 
-      -- the signals to be processed and must not be less
-      -- than `Size`.
-      type Instance (Size : Natural; Capacity : Natural) is private;
+      type Instance (Size : Natural) is private;
 
       ------------------------------------------------------------------
       -- Dot
@@ -109,29 +110,26 @@ package Iderium.Media.Filter is
    private
 
       type Buffer_Data is 
-        array (Natural range <>) of Signal.Sample_Type;
+        array (Integer range <>) of Signal.Sample_Type;
 
       -- `Current` points to the last available slot in `Data`.
       -- Current buffer is stored in `Data(Current+1..Current+Size)`.
-      type Instance (Size : Natural; Capacity : Natural) is
+      type Instance (Size : Natural) is
          record
-            Data    : Buffer_Data (1 .. Capacity);
-            Current : Integer := Capacity - Size;
+            Data    : Buffer_Data (-Buffer_Capacity + 1 .. Size);
+            Current : Integer := 0;
          end record;
 
    end Buffer;
 
 
-   -- Filter descriptor (or context).
-   -- `M` defines a number of input coefficients,
-   -- `N` defines a number of feedback coefficients,
-   -- `Capacity` is used for both buffers.
-   type Instance (M : Natural; N : Natural; Capacity : Natural) is 
+   type Instance (M : Natural; N : Natural) is 
       tagged record
-         A : Arrays.Real_Vector (0 .. M);
-         B : Arrays.Real_Vector (1 .. N);
-         I : Buffer.Instance (M, Capacity);
-         F : Buffer.Instance (N, Capacity);
+         A : Arrays.Real;
+         B : Arrays.Real_Vector (1 .. M);
+         C : Arrays.Real_Vector (1 .. N);
+         I : Buffer.Instance (M);
+         F : Buffer.Instance (N);
       end record;
 
 

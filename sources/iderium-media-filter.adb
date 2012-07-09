@@ -30,20 +30,21 @@ package body Iderium.Media.Filter is
       -- Push
       ------------------------------------------------------------------
       -- Implementation notes:
-      --    The more `Capacity` is, the longer `Push` works fast.
+      --    None.
       ------------------------------------------------------------------
       procedure Push (Buffer : in out Instance;
                       Sample : Signal.Sample_Type) is
-         Beginning : Natural := Buffer.Capacity - Buffer.Size;
+         Data : Buffer_Data renames Buffer.Data;
+         Current : Integer renames Buffer.Current;
       begin
-         if Buffer.Current = 0 then
+         if Current < Data'First then
             -- We need to shift the buffer manually.
-            Buffer.Data(Beginning + 1 .. Buffer.Capacity) := 
-              Buffer.Data(1 .. Buffer.Size);
-            Buffer.Current := Beginning;
+            Data(1 .. Buffer.Size) := 
+              Data(Current + 1 .. Current + Buffer.Size);
+            Current := 0;
          end if;
-         Buffer.Data(Buffer.Current) := Sample;
-         Buffer.Current := Buffer.Current - 1;
+         Data(Current) := Sample;
+         Current := Current - 1;
       end Push;
 
       ------------------------------------------------------------------
@@ -54,7 +55,7 @@ package body Iderium.Media.Filter is
       ------------------------------------------------------------------
       procedure Fill (Buffer : in out Instance;
                       Sample : Signal.Sample_Type) is
-         Current : Natural renames Buffer.Current;
+         Current : Integer renames Buffer.Current;
       begin
          Buffer.Data(Current + 1 .. Current + Buffer.Size) := 
            (others => Sample);
@@ -71,11 +72,11 @@ package body Iderium.Media.Filter is
                      Sample : Signal.Sample_Type;
                      Factor : Arrays.Real) is
          use type Arrays.Real;
+         Data : Buffer_Data renames Buffer.Data;
          Current : Natural renames Buffer.Current;
       begin
          for I in Current + 1 .. Current + Buffer.Size loop
-            Buffer.Data(I) := Buffer.Data(I) + 
-              Factor * (Sample + (-1.0) * Buffer.Data(I));
+            Data(I) := Data(I) + Factor * (Sample + (-1.0) * Data(I));
          end loop;
       end Mix;
 
@@ -106,10 +107,9 @@ package body Iderium.Media.Filter is
       Capture (Filter.Input.all);
       Filter.Active := Filter.Input.Active;
       if Filter.Active then
-         Filter.Sample := Filter.Context.A(0) * Filter.Input.Sample;
-         Buffer.Dot (Filter.Context.A(1 .. Filter.Context.M), 
-           Filter.Context.I, Filter.Sample);
-         Buffer.Dot (Filter.Context.B, Filter.Context.F, Filter.Sample);
+         Filter.Sample := Filter.Context.A * Filter.Input.Sample;
+         Buffer.Dot (Filter.Context.B, Filter.Context.I, Filter.Sample);
+         Buffer.Dot (Filter.Context.C, Filter.Context.F, Filter.Sample);
          Buffer.Push (Filter.Context.I, Filter.Input.Sample);
          Buffer.Push (Filter.Context.F, Filter.Sample);
       end if;
