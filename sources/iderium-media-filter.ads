@@ -31,7 +31,7 @@ generic
    with package Signal is new Iderium.Media.Signal (<>);
 
    -- This operation must be defined on samples.
-   with function "*" (Left  : Arrays.Real; Right : Signal.Sample_Type)
+   with function "*" (Left : Arrays.Real; Right : Signal.Sample_Type)
      return Signal.Sample_Type is <>;
 
    -- This operation must be defined on samples.

@@ -5,12 +5,10 @@
 --   This package allows you to work with an abstract signals.
 -- Concept:
 --   A signal is a sequence of samples.
---   When you capture a signal, the next sample from the signal is 
---   extracted to the `Sample`. If there are no samples anymore, then 
---   Active is set to FALSE.
+--   When you capture a signal, next sample from the signal is 
+--   extracted into `Sample`. If there are no samples anymore, then 
+--   `Active` is set to FALSE.
 ------------------------------------------------------------------------
-
-with Iderium.Resource;
 
 generic
 
