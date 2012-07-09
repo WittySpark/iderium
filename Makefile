@@ -8,7 +8,7 @@ check: build
 
 build:
 ifdef demo
-	@old=`cat .demo`; cp demo.adb demos/${old}.demo
+	old=`cat .demo`; cp demo.adb demos/$${old}.demo
 	@cp demos/$(demo).demo demo.adb; echo $(demo) > .demo
 endif
 	@mkdir rubbish
