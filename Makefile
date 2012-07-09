@@ -8,10 +8,10 @@ check: build
 
 build:
 ifdef demo
-	old=`cat .demo`; cp demo.adb demos/$${old}.demo
+	@if [ -e .demo ]; then old=`cat .demo`; cp demo.adb demos/$${old}.demo; fi
 	@cp demos/$(demo).demo demo.adb; echo $(demo) > .demo
 endif
-	@mkdir rubbish
+	@mkdir -p rubbish
 	@gprbuild -Pdemo
 	@rm -rf rubbish
 
