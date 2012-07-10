@@ -1,12 +1,17 @@
 with Ada.Text_IO;
+with Ada.Unchecked_Deallocation;
 with Iderium.Resource;
 
 procedure Demo is
 
    type String_Access is access String;
 
+   procedure Free is
+     new Ada.Unchecked_Deallocation (String, String_Access);
+
+
    package String_Resource is
-     new Iderium.Resource (String, String_Access);
+     new Iderium.Resource (Object_Type => String_Access);
 
    -- Empty resource.
    R0 : String_Resource.Instance;

@@ -81,9 +81,8 @@ procedure Demo is
      Simple_Earf.Create (
        Simple_Filter.Instance'(M => 0,
                                N => 1,
-                        Capacity => 10,
-                               A => (0 => Alpha),
-                               B => (1 => 1.0 - Alpha),
+                               A => Alpha,
+                               C => (1 => 1.0 - Alpha),
                           others => <>)
      );
 

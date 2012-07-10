@@ -2,7 +2,7 @@
 -- Iderium.Resource
 ------------------------------------------------------------------------
 -- Implementation notes:
---    The implementation uses the concept of reference counting.
+--    The implementation uses a concept of reference counting.
 ------------------------------------------------------------------------
 
 package body Iderium.Resource is
@@ -24,11 +24,11 @@ package body Iderium.Resource is
    -- Implementation notes:
    --    Allocates a new user counter.
    ---------------------------------------------------------------------
-   function Create (Object : Object_Access_Type) return Instance is
+   function Create (Object : Object_Type) return Instance is
       Result : Instance;
    begin
       Result.User_Count := new Counter'(1);
-      Result.Object     := Object;
+      Result.Object := Object;
       return Result;
    end Create;
 
@@ -36,12 +36,12 @@ package body Iderium.Resource is
    -- Get
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    May return NULL access!
+   --    Raises `Invalid_Resource` exception when the resource is empty.
    ---------------------------------------------------------------------
-   function Get (Resource : Instance) return Object_Access_Type is
+   function Get (Resource : Instance) return Object_Type is
    begin
       if Is_Empty (Resource) then
-         return null;
+         raise Invalid_Resource;
       end if;
       return Resource.Object;
    end Get;
@@ -64,8 +64,8 @@ package body Iderium.Resource is
    -- Finalize
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    The last user releases the memory.
-   --    The user counter is set to NULL automatically.
+   --    The last user calls `Free` procedure.
+   --    The user counter then is set to NULL automatically.
    ---------------------------------------------------------------------
    procedure Finalize (Resource : in out Instance) is
    begin

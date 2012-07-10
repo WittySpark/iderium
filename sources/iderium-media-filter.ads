@@ -132,6 +132,8 @@ package Iderium.Media.Filter is
          F : Buffer.Instance (N);
       end record;
 
+   type Instance_Access is access Instance;
+
 
    type Output (Context : not null access Instance;
                   Input : not null access Input_Type) is
@@ -142,3 +144,4 @@ package Iderium.Media.Filter is
    pragma Inline (Capture);
 
 end Iderium.Media.Filter;
+
