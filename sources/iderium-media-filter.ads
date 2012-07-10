@@ -21,7 +21,9 @@
 ------------------------------------------------------------------------
 
 with Ada.Numerics.Generic_Real_Arrays;
+with Ada.Unchecked_Deallocation;
 with Iderium.Media.Signal;
+with Iderium.Resource;
 
 generic
 
@@ -134,6 +136,11 @@ package Iderium.Media.Filter is
 
    type Instance_Access is access Instance;
 
+   procedure Free is
+     new Ada.Unchecked_Deallocation (Instance, Instance_Access);
+
+   package Resource is new Iderium.Resource (Instance_Access);
+
 
    type Output (Context : not null access Instance;
                   Input : not null access Input_Type) is
@@ -144,4 +151,3 @@ package Iderium.Media.Filter is
    pragma Inline (Capture);
 
 end Iderium.Media.Filter;
-
