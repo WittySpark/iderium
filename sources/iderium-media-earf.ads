@@ -2,13 +2,13 @@
 -- Iderium.Media.Earf
 ------------------------------------------------------------------------
 -- Purpose:
---    This package provides a generic causal recursive filter interface.
---    It works with arbitrary real types and signal types.
 -- Concept:
 ------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
 with Iderium.Media.Signal;
 with Iderium.Media.Filter;
+with Iderium.Resource;
 
 generic
 
@@ -21,9 +21,21 @@ generic
 
 package Iderium.Media.Earf is
 
-   type Instance is new Filter.Instance with private;
+   type Instance is new Filter.Instance with
+      record
+         R : Filter.Arrays.Real;
+      end record;
 
    function Create (Base : Filter.Instance) return Instance;
+
+
+   type Instance_Access is access Instance;
+
+   procedure Free is
+     new Ada.Unchecked_Deallocation (Instance, Instance_Access);
+
+
+   package Resource is new Iderium.Resource (Instance_Access);
 
 
    type Output (Context : not null access Instance; 
@@ -34,12 +46,5 @@ package Iderium.Media.Earf is
    overriding
    procedure Capture (Earf : in out Output);
    pragma Inline (Capture);
-
-private
-
-   type Instance is new Filter.Instance with
-      record
-         R : Filter.Arrays.Real;
-      end record;
 
 end Iderium.Media.Earf;

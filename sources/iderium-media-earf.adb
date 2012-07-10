@@ -22,8 +22,8 @@ package body Iderium.Media.Earf is
       end Sum;
 
    begin
-      return Instance'(Filter.Instance'(Base) with 
-        R => (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
+      return Instance'(Base with R => 
+        (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
    end Create;
 
 

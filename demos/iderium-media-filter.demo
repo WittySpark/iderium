@@ -51,16 +51,20 @@ procedure Demo is
    -- A simple first-order recursive filter:
    --   out = alpha * in + (1 - alpha) * prev.
    Alpha : constant := 0.1;
-   Example : aliased Simple_Filter.Instance := (M => 0,
-                                                N => 1,
-                                                A => Alpha,
-                                                C => (1 => 1.0 - Alpha),
-                                           others => <>);
+   Example : Simple_Filter.Instance_Access := 
+     new Simple_Filter.Instance'(M => 0,
+                                 N => 1,
+                                 A => Alpha,
+                                 C => (1 => 1.0 - Alpha),
+                            others => <>);
 
-   Example_Output : Simple_Filter.Output (Example'Access, Input'Access);
+   Example_Resource : Simple_Filter.Resource.Instance := 
+     Simple_Filter.Resource.Create (Example);
+
+   Example_Output : Simple_Filter.Output (Example, Input'Access);
 
 begin
-   Simple_Filter.Buffer.Fill (Example'Access.I, 0.0);
-   Simple_Filter.Buffer.Fill (Example'Access.F, 0.0);
+   Simple_Filter.Buffer.Fill (Example.I, 0.0);
+   Simple_Filter.Buffer.Fill (Example.F, 0.0);
    Print (Example_Output);
 end Demo;
