@@ -21,7 +21,7 @@ generic
 
 package Iderium.Media.Earf is
 
-   type Instance (M : Natural; N : Natural) is private;
+   type Instance is private;
 
    function Create (Base : Filter.Instance) return Instance;
 
@@ -44,12 +44,11 @@ package Iderium.Media.Earf is
 
 private
 
-   type Instance (M : Natural; N : Natural) is 
-     new Filter.Instance (M, N) with
+   type Instance is
       record
-         R : Filter.Arrays.Real;
+         Base : Filter.Resource.Instance;
+         R    : Filter.Arrays.Real;
       end record;
-
 
    procedure Deallocate is
      new Ada.Unchecked_Deallocation (Instance, Instance_Access);

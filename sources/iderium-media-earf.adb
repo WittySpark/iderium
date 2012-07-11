@@ -21,10 +21,9 @@ package body Iderium.Media.Earf is
          return Result;
       end Sum;
 
+      Base_Copy : Filter.Instance_Access := new Filter.Instance'(Base);
    begin
-      return Instance'(Filter.Instance'(Base) with 
-        M => Base.M,
-        N => Base.N,
+      return Instance'(Base => Filter.Resource.Create (Base_Copy), 
         R => (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
    end Create;
 
@@ -37,20 +36,21 @@ package body Iderium.Media.Earf is
    overriding
    procedure Capture (Earf : in out Output) is
       use Filter;
+      Base : Filter.Instance_Access := 
+        Filter.Resource.Get (Earf.Context.Base);
    begin
       Capture (Earf.Input.all);
       Capture (Earf.Edges.all);
       Earf.Active := Earf.Input.Active;
       if Earf.Active then
-         Buffer.Mix (Earf.Context.I, Earf.Input.Sample, 
+         Buffer.Mix (Base.I, Earf.Input.Sample, Earf.Edges.Sample);
+         Buffer.Mix (Base.F, Earf.Context.R * Earf.Input.Sample, 
            Earf.Edges.Sample);
-         Buffer.Mix (Earf.Context.F, Earf.Context.R * Earf.Input.Sample,
-           Earf.Edges.Sample);
-         Earf.Sample := Earf.Context.A * Earf.Input.Sample;
-         Buffer.Dot (Earf.Context.B, Earf.Context.I, Earf.Sample);
-         Buffer.Dot (Earf.Context.C, Earf.Context.F, Earf.Sample);
-         Buffer.Push (Earf.Context.I, Earf.Input.Sample);
-         Buffer.Push (Earf.Context.F, Earf.Sample);
+         Earf.Sample := Base.A * Earf.Input.Sample;
+         Buffer.Dot (Base.B, Base.I, Earf.Sample);
+         Buffer.Dot (Base.C, Base.F, Earf.Sample);
+         Buffer.Push (Base.I, Earf.Input.Sample);
+         Buffer.Push (Base.F, Earf.Sample);
       end if;
    end Capture;
 
