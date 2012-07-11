@@ -139,6 +139,7 @@ package Iderium.Media.Filter is
    procedure Free is
      new Ada.Unchecked_Deallocation (Instance, Instance_Access);
 
+
    package Resource is new Iderium.Resource (Instance_Access);
 
 

@@ -22,9 +22,16 @@ package body Iderium.Media.Earf is
       end Sum;
 
    begin
-      return Instance'(Base with R => 
-        (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
+      return Instance'(Filter.Instance'(Base) with 
+        M => Base.M,
+        N => Base.N,
+        R => (Base.A + Sum (Base.B)) / (1.0 - Sum (Base.C)));
    end Create;
+
+   procedure Free (Name : in out Instance_Access) is
+   begin
+      Deallocate (Name);
+   end Free;
 
 
    overriding
