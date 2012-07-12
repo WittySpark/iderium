@@ -23,6 +23,8 @@ generic
 
 package Iderium.Resource is
 
+   -- INSTANCE ---------------------------------------------------------
+
    type Instance is private;
 
    Invalid_Resource : exception;
@@ -62,6 +64,8 @@ package Iderium.Resource is
 
 private
 
+   -- COUNTER ----------------------------------------------------------
+
    type Counter is new Natural;
 
    type Counter_Access is access Counter;
@@ -69,7 +73,8 @@ private
    procedure Free is 
      new Ada.Unchecked_Deallocation (Counter, Counter_Access);
 
-
+   -- INSTANCE ---------------------------------------------------------
+   
    type Instance is new Ada.Finalization.Controlled with
       record
          User_Count : Counter_Access := null;

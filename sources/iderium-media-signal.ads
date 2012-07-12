@@ -16,6 +16,8 @@ generic
 
 package Iderium.Media.Signal is
 
+   -- INSTANCE ---------------------------------------------------------
+
    type Instance is 
       abstract tagged limited record
          Active : Boolean := True;

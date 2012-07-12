@@ -23,6 +23,7 @@
 with Ada.Numerics.Generic_Real_Arrays;
 with Ada.Unchecked_Deallocation;
 with Iderium.Media.Signal;
+with Iderium.Media.Frame;
 with Iderium.Resource;
 
 generic
@@ -51,7 +52,11 @@ generic
 
 package Iderium.Media.Filter is
 
+   -- BUFFER -----------------------------------------------------------
+
    package Buffer is
+
+      -- INSTANCE ------------------------------------------------------
 
       -- It works as a sliding vector of length `Size`.
       type Instance (Size : Natural) is private;
@@ -111,6 +116,8 @@ package Iderium.Media.Filter is
 
    private
 
+      -- INSTANCE ------------------------------------------------------
+
       type Buffer_Data is 
         array (Integer range <>) of Signal.Sample_Type;
 
@@ -124,6 +131,7 @@ package Iderium.Media.Filter is
 
    end Buffer;
 
+   -- INSTANCE ---------------------------------------------------------
 
    type Instance (M : Natural; N : Natural) is 
       tagged record
@@ -139,9 +147,9 @@ package Iderium.Media.Filter is
    procedure Free is
      new Ada.Unchecked_Deallocation (Instance, Instance_Access);
 
-
    package Resource is new Iderium.Resource (Instance_Access);
 
+   -- OUTPUT -----------------------------------------------------------
 
    type Output (Context : not null access Instance;
                   Input : not null access Input_Type) is
@@ -150,5 +158,19 @@ package Iderium.Media.Filter is
    overriding
    procedure Capture (Filter : in out Output);
    pragma Inline (Capture);
+
+   -- PAIR -------------------------------------------------------------
+
+   type Pair_Connection is (Parallel, Sequential);
+   
+   type Pair (Connection : Pair_Connection) is private;
+
+   function Create (Connection : Pair_Connection;
+             Forward, Backward : Instance) return Pair;
+                    
+   generic
+      with package Frame is
+        new Iderium.Media.Frame (Signal.Sample_Type);
+   procedure Apply (Filter : Pair
 
 end Iderium.Media.Filter;

@@ -39,7 +39,6 @@ private
    function Initialize_Broadcast (Direction : Broadcast_Direction;
                             First, Last : Integer) return Integer;
 
-
    type Broadcast (Frame : not null access Instance;
                Direction : Broadcast_Direction) is
      new Signal.Instance with
