@@ -120,4 +120,16 @@ package body Iderium.Media.Filter is
       end if;
    end Capture;
 
+   -- PAIR -------------------------------------------------------------
+
+   function Create (Connection : Pair_Connection;
+             Forward, Backward : Instance) return Pair is
+      Forward_Copy  : Instance_Access := new Instance'(Forward);
+      Backward_Copy : Instance_Access := new Instance'(Backward);
+   begin
+      return Pair'(Connection => Connection,
+                      Forward => Resource.Create (Forward_Copy),
+                     Backward => Resource.Create (Backward_Copy));
+   end Create;
+
 end Iderium.Media.Filter;

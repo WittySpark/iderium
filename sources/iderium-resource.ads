@@ -19,6 +19,7 @@ generic
    -- The type of the objects to store in the resources.
    type Object_Type is private;
 
+   -- The procedure to call when the stored object is no longer needed.
    with procedure Free (Object : in out Object_Type) is <>;
 
 package Iderium.Resource is
@@ -30,21 +31,21 @@ package Iderium.Resource is
    Invalid_Resource : exception;
 
    ---------------------------------------------------------------------
-   -- Is_Empty
+   -- Void
    ---------------------------------------------------------------------
    -- Purpose:
-   --    Returns TRUE iff the given resource is empty.
+   --    Returns `True` iff the given resource is empty.
    -- Exceptions:
    --    None.
    ---------------------------------------------------------------------
-   function Is_Empty (Resource : Instance) return Boolean;
-   pragma Inline (Is_Empty);
+   function Void (Resource : Instance) return Boolean;
+   pragma Inline (Void);
 
    ---------------------------------------------------------------------
    -- Create
    ---------------------------------------------------------------------
    -- Purpose:
-   --    Creates a new resource, storing the given object.
+   --    Creates a new resource storing the given object.
    -- Exceptions:
    --    None.
    ---------------------------------------------------------------------
@@ -74,10 +75,10 @@ private
      new Ada.Unchecked_Deallocation (Counter, Counter_Access);
 
    -- INSTANCE ---------------------------------------------------------
-   
+
    type Instance is new Ada.Finalization.Controlled with
       record
-         User_Count : Counter_Access := null;
+         References : Counter_Access := null;
          Object     : Object_Type;
       end record;
 

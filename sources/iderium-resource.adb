@@ -10,27 +10,27 @@ package body Iderium.Resource is
    -- INSTANCE ---------------------------------------------------------
 
    ---------------------------------------------------------------------
-   -- Is_Empty
+   -- Void
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    The resource is empty iff it does not have a user counter.
+   --    The resource is empty iff it does not have a reference counter.
    ---------------------------------------------------------------------
-   function Is_Empty (Resource : Instance) return Boolean is
+   function Void (Resource : Instance) return Boolean is
    begin
-      return Resource.User_Count = null;
-   end Is_Empty;
+      return Resource.References = null;
+   end Void;
 
    ---------------------------------------------------------------------
    -- Create
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    Allocates a new user counter.
+   --    Allocates a new reference counter.
    ---------------------------------------------------------------------
    function Create (Object : Object_Type) return Instance is
       Result : Instance;
    begin
-      Result.User_Count := new Counter'(1);
-      Result.Object := Object;
+      Result.References := new Counter'(1);
+      Result.Object     := Object;
       return Result;
    end Create;
 
@@ -38,11 +38,11 @@ package body Iderium.Resource is
    -- Get
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    Raises `Invalid_Resource` exception when the resource is empty.
+   --    Raises `Invalid_Resource` when the resource is empty.
    ---------------------------------------------------------------------
    function Get (Resource : Instance) return Object_Type is
    begin
-      if Is_Empty (Resource) then
+      if Void (Resource) then
          raise Invalid_Resource;
       end if;
       return Resource.Object;
@@ -56,8 +56,8 @@ package body Iderium.Resource is
    ---------------------------------------------------------------------
    procedure Adjust (Resource : in out Instance) is
    begin
-      if not Is_Empty (Resource) then
-         Resource.User_Count.all := Resource.User_Count.all + 1;
+      if not Void (Resource) then
+         Resource.References.all := Resource.References.all + 1;
       end if;
    end Adjust;
 
@@ -65,17 +65,16 @@ package body Iderium.Resource is
    -- Finalize
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    The last user calls `Free` procedure.
-   --    The user counter then is set to NULL automatically.
+   --    The reference counter then is set to `null` automatically.
    ---------------------------------------------------------------------
    procedure Finalize (Resource : in out Instance) is
    begin
-      if not Is_Empty (Resource) then
-         if Resource.User_Count.all = 1 then
-            Free (Resource.User_Count);
+      if not Void (Resource) then
+         if Resource.References.all = 1 then
+            Free (Resource.References);
             Free (Resource.Object); 
          else
-            Resource.User_Count.all := Resource.User_Count.all - 1;
+            Resource.References.all := Resource.References.all - 1;
          end if;
       end if;
    end Finalize;

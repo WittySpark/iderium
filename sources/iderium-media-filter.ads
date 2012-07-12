@@ -163,14 +163,24 @@ package Iderium.Media.Filter is
 
    type Pair_Connection is (Parallel, Sequential);
    
-   type Pair (Connection : Pair_Connection) is private;
+   type Pair is private;
 
    function Create (Connection : Pair_Connection;
              Forward, Backward : Instance) return Pair;
-                    
+
    generic
       with package Frame is
         new Iderium.Media.Frame (Signal.Sample_Type);
-   procedure Apply (Filter : Pair
+   procedure Apply (System : Pair; Data : in out Frame);
+
+private
+
+   -- PAIR -------------------------------------------------------------
+
+   type Pair is
+      record
+         Connection : Pair_Connection;
+         Forward, Backward : Resource.Instance;
+      end record;
 
 end Iderium.Media.Filter;
