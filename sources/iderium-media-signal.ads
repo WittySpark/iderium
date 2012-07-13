@@ -5,9 +5,10 @@
 --   This package allows you to work with an abstract signals.
 -- Concept:
 --   A signal is a sequence of samples.
---   When you capture a signal, next sample from the signal is 
---   extracted into `Sample`. If there are no samples anymore, then 
---   `Active` is set to FALSE.
+--   In order to get the next sample of a signal you call `Capture` 
+--   procedure. The captured sample then will be stored in `Sample`. 
+--   If there are no more samples in the signal, then `Active` is set 
+--   to `False`. Otherwise, of course, `Active` is set to `True`.
 ------------------------------------------------------------------------
 
 generic

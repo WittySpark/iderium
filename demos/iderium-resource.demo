@@ -9,16 +9,16 @@ procedure Demo is
    procedure Free is
      new Ada.Unchecked_Deallocation (String, String_Access);
 
-
+   -- The resources contain dynamically allocated strings.
    package String_Resource is
      new Iderium.Resource (Object_Type => String_Access);
 
-   -- Empty resource.
+   -- Void resource.
    R0 : String_Resource.Instance;
 
    -- `R1` has only one user.
    R1 : String_Resource.Instance := 
-     String_Resource.Create (new String'("Hello, world!"));
+     String_Resource.Create (new String'("Hello, Ada!"));
 
    -- `R1` and `R2` share the same string.
    R2 : String_Resource.Instance := R1;
@@ -28,14 +28,19 @@ procedure Demo is
      String_Resource.Create (new String'("To be replaced."));
 
 begin
-   -- God bless Ada's `Adjust` procedure!
-   R1 := R1;
-   -- `R3` is released. Now `R1`, `R2`, and `R3` share the same string.
-   R3 := R2;
-   -- Just in case.
+   -- At the beginning we have...
    Ada.Text_IO.Put_Line (String_Resource.Get (R1).all);
    Ada.Text_IO.Put_Line (String_Resource.Get (R2).all);
    Ada.Text_IO.Put_Line (String_Resource.Get (R3).all);
-   -- Two users left.
+   -- God bless Ada's `Adjust` procedure!
+   R1 := R1;
+   -- `R3` is released. Now `R1`, `R2` and `R3` share the same string.
+   R3 := R2;
+   -- We make sure that all the resources contain the same string.
+   Ada.Text_IO.Put_Line (String_Resource.Get (R1).all);
+   Ada.Text_IO.Put_Line (String_Resource.Get (R2).all);
+   Ada.Text_IO.Put_Line (String_Resource.Get (R3).all);
+   -- Only two users left.
    R1 := R0;
+   -- Memory is released at this end-point.
 end Demo;

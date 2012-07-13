@@ -77,18 +77,21 @@ procedure Demo is
 
    -- A non-linear first-order recursive filter.
    Alpha : constant := 0.05;
-   Example : aliased Simple_Earf.Instance := 
-     Simple_Earf.Create (
+   Example : Simple_Earf.Instance_Access := 
+     new Simple_Earf.Instance'(Simple_Earf.Create (
        Simple_Filter.Instance'(M => 0,
                                N => 1,
                                A => Alpha,
                                C => (1 => 1.0 - Alpha),
                           others => <>)
-     );
+     ));
 
-   Example_Output : Simple_Earf.Output (Example'Access, 
-                                          Input'Access, 
-                                          Edges'Access);
+   Example_Resource : Simple_Earf.Resource.Instance :=
+     Simple_Earf.Resource.Create (Example);
+
+   Example_Output : Simple_Earf.Output (Example, 
+                                        Input'Access, 
+                                        Edges'Access);
 
 begin
    Print (Example_Output);
