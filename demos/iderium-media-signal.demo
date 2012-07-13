@@ -9,11 +9,11 @@ procedure Demo is
      new Iderium.Media.Signal (Sample_Type => Positive);
 
    -- Derive a new signal type.
-   -- This signal will contain only prime numbers.
+   -- This signal will contain only prime positive numbers.
    type Prime_Signal is
      new Positive_Signal.Instance with null record;
 
-   -- Implement the `Capture` procedure for the new signal type.
+   -- Implement `Capture` procedure for the new signal type.
    overriding
    procedure Capture (Signal : in out Prime_Signal) is
       -- Let's make some names a bit shorter.
@@ -27,20 +27,19 @@ procedure Demo is
          N := N + 1;
          -- Assume it to be prime.
          Prime := True;
-         -- For all possible dividers.
+         -- Check all possible dividers.
          for Divider in 2 .. Positive (Sqrt (Float (N))) loop
             Prime := N rem Divider /= 0;
-            -- Definitely not prime.
             exit when not Prime;
          end loop;
-         -- Is N prime?
+         -- Is `N` really prime?
          exit when Prime;
       end loop;
-      -- We stop when N becomes greater then 1000.
+      -- We stop when `N` becomes greater then 1000.
       Signal.Active := N < 1000;
    end Capture;
 
-   -- This procedure demonstrates usage of a signal.
+   -- This procedure demonstrates a signal usage.
    procedure Print (Signal : in out Positive_Signal.Instance'Class) is
    begin
       loop
