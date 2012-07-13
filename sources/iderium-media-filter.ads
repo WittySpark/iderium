@@ -31,25 +31,24 @@
 
 with Ada.Numerics.Generic_Real_Arrays;
 with Ada.Unchecked_Deallocation;
-with Iderium.Media.Signal;
 with Iderium.Media.Frame;
+with Iderium.Media.Signal;
 with Iderium.Resource;
 
 generic
 
-   -- Also defines a real type to be used by filter.
+   -- Also defines a real type to be used.
    with package Arrays is new Ada.Numerics.Generic_Real_Arrays (<>);
 
-   -- Also defines a sample type to be used by filter.
+   -- Also defines a sample type to be used.
    with package Signal is new Iderium.Media.Signal (<>);
 
-   -- This operation must be defined on samples.
+   -- This operator must be defined on samples.
    with function "*" (Left : Arrays.Real; Right : Signal.Sample_Type)
      return Signal.Sample_Type is <>;
 
-   -- This operation must be defined on samples.
-   with function "+" (Left : Signal.Sample_Type; 
-                     Right : Signal.Sample_Type)
+   -- This operator must be defined on samples.
+   with function "+" (Left, Right : Signal.Sample_Type)
      return Signal.Sample_Type is <>;
 
    -- A concrete input signal type to work with.
@@ -67,7 +66,7 @@ package Iderium.Media.Filter is
 
       -- INSTANCE ------------------------------------------------------
 
-      -- It works as a sliding vector of length `Size`.
+      -- Can be seen as a vector of length `Size`.
       type Instance (Size : Natural) is private;
 
       ------------------------------------------------------------------
@@ -85,7 +84,7 @@ package Iderium.Media.Filter is
       -- Push
       ------------------------------------------------------------------
       -- Purpose:
-      --    Shifts `Buffer` and puts `Sample` to its first slot.
+      --    Shifts `Buffer` down and puts `Sample` to the first slot.
       ------------------------------------------------------------------
       procedure Push (Buffer : in out Instance;
                       Sample : Signal.Sample_Type);
@@ -106,7 +105,7 @@ package Iderium.Media.Filter is
       ------------------------------------------------------------------
       -- Purpose:
       --    Replaces `Buffer` with the following linear combination:
-      --      (1 - `Factor`) * `Buffer` + `Factor` * `Sample`.
+      --      (1.0 - `Factor`) * `Buffer` + `Factor` * `Sample`.
       ------------------------------------------------------------------
       procedure Mix (Buffer : in out Instance; 
                      Sample : Signal.Sample_Type;
@@ -117,7 +116,7 @@ package Iderium.Media.Filter is
       -- Rotate
       ------------------------------------------------------------------
       -- Purpose:
-      --    Multiplies the whole `Buffer` by `Matrix`.
+      --    Multiplies column vector `Buffer` on the left by `Matrix`.
       ------------------------------------------------------------------
       procedure Rotate (Buffer : in out Instance; 
                         Matrix : Arrays.Real_Matrix);
@@ -151,6 +150,17 @@ package Iderium.Media.Filter is
          F : Buffer.Instance (N);
       end record;
 
+   ---------------------------------------------------------------------
+   -- Equilibrium
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Returns a real constant R such, that:
+   --      R * in = A * in + <B, {in}> + <C, {R * in}>,
+   --    where {x} is a vector [x x .. x]'.
+   --    Used in constant signal frame extrapolation.
+   ---------------------------------------------------------------------
+   function Equilibrium (Filter : Instance) return Arrays.Real;
+
    type Instance_Access is access Instance;
 
    procedure Free is
@@ -172,25 +182,42 @@ package Iderium.Media.Filter is
 
    package Pair is
 
-      type Scheme is (Parallel, Sequential);
+      -- INSTANCE ------------------------------------------------------
 
-      type Instance (Connection : Scheme) is private;
+      type Connection_Scheme is (Parallel, Sequential);
 
---   generic
---      with package Frame is
---        new Iderium.Media.Frame (Signal.Sample_Type);
---   procedure Apply (System : Pair; Data : in out Frame.Instance);
+      type Instance (Scheme : Connection_Scheme) is private;
 
-      function Create (Connection : Scheme;
-                Forward, Backward : Filter.Instance) return Instance;
+      function Create (Scheme : Connection_Scheme;
+            Forward, Backward : Filter.Instance) return Instance;
+
+      generic
+         with package Frame is new Iderium.Media.Frame (Signal);
+      procedure Apply (Pair : Instance; Data : in out Frame.Instance);
 
    private
 
-      -- PAIR ----------------------------------------------------------
+      -- INSTANCE ------------------------------------------------------
 
-      type Instance (Connection : Scheme) is
+      type Matrix_Access is access Arrays.Real_Matrix;
+
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Arrays.Real_Matrix, 
+                                             Matrix_Access);
+
+      package Matrix_Resource is new Iderium.Resource (Matrix_Access);
+
+      type Instance (Scheme : Connection_Scheme) is
          record
-            Forward, Backward : Filter.Resource.Instance;
+            Forward, Backward    : Filter.Resource.Instance;
+            Forward_Equilibrium  : Arrays.Real;
+            Backward_Equilibrium : Arrays.Real;
+            case Scheme is
+               when Parallel =>
+                  null;
+               when Sequential =>
+                 Reversal : Matrix_Resource.Instance;
+            end case;
          end record;
 
    end Pair;
