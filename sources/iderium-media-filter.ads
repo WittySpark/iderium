@@ -2,22 +2,31 @@
 -- Iderium.Media.Filter
 ------------------------------------------------------------------------
 -- Purpose:
---    This package provides a generic causal recursive filter interface.
---    It works with arbitrary real types and signal types.
+--    This package allows you to work with linear recursive systems.
 -- Concept:
---    A filter takes input signal samples and transforms them to:
+--    A linear recursive system can be decomposed into causal and
+--    anti-causal parts, which form a filter pair.
+--    Causal filters are used to process infinite signals, and 
+--    filter pairs are used to process finite signal frames.
+--    A causal filter transforms the input samples as follows:
 --      out := A * in + <B, I> + <C, F>,
---    where 
---          `out` is current output sample,
+--    where `out` is current output sample,
 --           `in` is current input sample, 
 --            `I` is current input buffer (last M input samples),
 --            `F` is current feedback buffer (last N output samples),
 --            `A` is the main coefficient,
---            `B` are input coefficients,
---            `C` are feedback coefficients,
---        `<*,*>` denotes a dot-product.
+--            `B` is a vector of input coefficients,
+--            `C` is a vector of feedback coefficients,
+--       `<*, *>` denotes a dot product.
 --    The filter's transfer function (in terms of Z-transform) H(z) is
 --      (A + \sum_{i=1}^{M} B(i) z^-i) / (1 - \sum_{i=1}^N C(i) z^-i).
+--    A filter pair transforms a signal frame depending on the
+--    connection scheme it uses. There are two connection schemes:
+--      - parallel: out := Forward[in] + Backward[out],
+--      - sequential: out := Backward[Forward[in]].
+--    A filter pair assumes a nearest-neighbour extrapolation outside
+--    the input frame and correctly handles a boundary condition when
+--    the sequential connection scheme is used.
 ------------------------------------------------------------------------
 
 with Ada.Numerics.Generic_Real_Arrays;
