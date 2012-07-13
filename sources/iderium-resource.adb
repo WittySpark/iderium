@@ -13,7 +13,7 @@ package body Iderium.Resource is
    -- Void
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    The resource is empty iff it does not have a reference counter.
+   --    A resource is empty iff it does not have a reference counter.
    ---------------------------------------------------------------------
    function Void (Resource : Instance) return Boolean is
    begin
@@ -65,7 +65,9 @@ package body Iderium.Resource is
    -- Finalize
    ---------------------------------------------------------------------
    -- Implementation notes:
-   --    The reference counter then is set to `null` automatically.
+   --    Just decreases the counter.
+   --    The last user also destroys the counter.
+   --    Notice, that `References` is set to `null` automatically.
    ---------------------------------------------------------------------
    procedure Finalize (Resource : in out Instance) is
    begin

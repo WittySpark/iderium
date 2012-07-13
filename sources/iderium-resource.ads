@@ -16,10 +16,10 @@ with Ada.Unchecked_Deallocation;
 
 generic
 
-   -- The type of the objects to store in the resources.
+   -- A type of the objects to store in the resources.
    type Object_Type is private;
 
-   -- The procedure to call when the stored object is no longer needed.
+   -- A procedure to call when the stored object is no longer needed.
    with procedure Free (Object : in out Object_Type) is <>;
 
 package Iderium.Resource is
@@ -56,7 +56,7 @@ package Iderium.Resource is
    -- Get
    ---------------------------------------------------------------------
    -- Purpose:
-   --    Returns the object stored in the given resource.
+   --    Returns an object stored in the given resource.
    -- Exceptions:
    --    Invalid_Resource.
    ---------------------------------------------------------------------
@@ -67,7 +67,7 @@ private
 
    -- COUNTER ----------------------------------------------------------
 
-   type Counter is new Natural;
+   type Counter is new Positive;
 
    type Counter_Access is access Counter;
 
