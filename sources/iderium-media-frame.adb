@@ -2,20 +2,20 @@
 -- Iderium.Media.Filter
 ------------------------------------------------------------------------
 -- Implementation notes:
---    
+--    None.
 ------------------------------------------------------------------------
 
 package body Iderium.Media.Frame is
 
    -- INSTANCE ---------------------------------------------------------
-   
+
    ---------------------------------------------------------------------
    -- Grab
    ---------------------------------------------------------------------
    -- Implementation notes:
+   --    None.
    ---------------------------------------------------------------------
-   procedure Grab (Input : in out Signal_Type; 
-                  Output : out Instance) is
+   procedure Grab (Input : in out Signal_Type; Output : out Instance) is
    begin
       for I in Output'Range loop
          Capture (Input);
@@ -26,35 +26,47 @@ package body Iderium.Media.Frame is
 
    -- BROADCAST --------------------------------------------------------
 
-   ---------------------------------------------------------------------
-   -- Capture
-   ---------------------------------------------------------------------
-   -- Implementation notes:
-   ---------------------------------------------------------------------
-   procedure Capture (Broadcast : in out Instance) is
-   begin
-      B.Active := B.Current in B.Frame'Range;
-      if B.Active then
-         B.Sample := B.Frame(B.Current);
-         case B.Direction is
+   package body Broadcast is
+
+      -- INSTANCE ------------------------------------------------------
+
+      ------------------------------------------------------------------
+      -- Capture
+      ------------------------------------------------------------------
+      -- Implementation notes:
+      --    Does not report about premature signal termination.
+      ------------------------------------------------------------------
+      procedure Capture (Broadcast : in out Instance) is
+      begin
+         Broadcast.Active := Broadcast.Index in Broadcast.Source'Range;
+         if Broadcast.Active then
+            Broadcast.Sample := Broadcast.Source(Broadcast.Index);
+            case Broadcast.Pass is
+               when Forward =>
+                  Broadcast.Index := Broadcast.Index + 1;
+               when Backward =>
+                  Broadcast.Index := Broadcast.Index - 1;
+            end case;
+         end if;
+      end Capture;
+
+      ------------------------------------------------------------------
+      -- Initialize
+      ------------------------------------------------------------------
+      -- Implementation notes:
+      --    None.
+      ------------------------------------------------------------------
+      function Initialize (Pass : Direction; First, Last : Integer)
+        return Integer is
+      begin
+         case Pass is
             when Forward =>
-               B.Current := B.Current + 1;
+               return First;
             when Backward =>
-               B.Current := B.Current - 1;
+               return Last;
          end case;
-      end if;
-   end Capture;
+      end Initialize;
 
-
-   function Initialize_Broadcast (Direction : Broadcast_Direction;
-                                First, Last : Integer) return Integer is
-   begin
-      case Direction is
-         when Forward =>
-            return First;
-         when Backward =>
-            return Last;
-      end case;
-   end Initialize_Broadcast;
+   end Broadcast;
 
 end Iderium.Media.Frame;

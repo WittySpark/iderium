@@ -2,7 +2,10 @@
 -- Iderium.Media.Frame
 ------------------------------------------------------------------------
 -- Purpose:
+--    This package handles finite signal parts, called "frames".
 -- Concept:
+--    A frame is a vector of samples which can be grabbed from a signal,
+--    as well as broadcasted as a signal (either forward or backward). 
 ------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
@@ -20,19 +23,16 @@ package Iderium.Media.Frame is
 
    type Instance is array (Integer range <>) of Signal.Sample_Type;
 
-   generic
-      
-   package 
-   
    ---------------------------------------------------------------------
    -- Grab
    ---------------------------------------------------------------------
    -- Purpose:
+   --    Captures `Output'Length` samples from `Input` and stores them
+   --    in `Output` frame.
    ---------------------------------------------------------------------
    generic
       type Signal_Type is new Signal.Instance with private;
-   procedure Grab (Input : in out Signal_Type; 
-                  Output : out Instance);
+   procedure Grab (Input : in out Signal_Type; Output : out Instance);
 
    type Instance_Access is access Instance;
 
@@ -45,27 +45,42 @@ package Iderium.Media.Frame is
 
    package Broadcast is
 
+      -- INSTANCE ------------------------------------------------------
+
       type Direction is (Forward, Backward);
 
       type Instance (Source : not null access Frame.Instance;
-                    Passage : Direction) is
+                       Pass : Direction) is 
         new Signal.Instance with private;
 
+      ------------------------------------------------------------------
+      -- Capture
+      ------------------------------------------------------------------
+      -- Purpose:
+      --    Captures a broadcasted frame.
+      ------------------------------------------------------------------
       overriding
       procedure Capture (Broadcast : in out Instance);
       pragma Inline (Capture);
 
    private
 
-      function Initialize (Passage : Direction;
-                       First, Last : Integer) return Integer;
+      -- INSTANCE ------------------------------------------------------
 
-      type Instance (Frame : not null access Instance;
-                   Passage : Direction) is new Signal.Instance with
+      ------------------------------------------------------------------
+      -- Initialize
+      ------------------------------------------------------------------
+      -- Purpose:
+      --    Selects an appropriate start index (`First` or `Last`).
+      ------------------------------------------------------------------
+      function Initialize (Pass : Direction; First, Last : Integer)
+        return Integer;
+
+      type Instance (Source : not null access Frame.Instance;
+                       Pass : Direction) is new Signal.Instance with
          record
-            Current : Integer := Initialize (Passage,
-                                         Frame'First,
-                                          Frame'Last);
+            Index : Integer := 
+              Initialize (Pass, Source'First, Source'Last);
          end record;
 
    end Broadcast;
