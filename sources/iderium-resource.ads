@@ -34,7 +34,7 @@ package Iderium.Resource is
    -- Void
    ---------------------------------------------------------------------
    -- Purpose:
-   --    Returns `True` iff the given resource is empty.
+   --    Returns `true` iff the given resource is empty.
    ---------------------------------------------------------------------
    function Void (Resource : Instance) return Boolean;
    pragma Inline (Void);
