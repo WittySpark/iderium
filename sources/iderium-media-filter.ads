@@ -213,9 +213,9 @@ package Iderium.Media.Filter is
 
       type Instance (Scheme : Connection_Scheme) is
          record
-            Forward, Backward    : Filter.Resource.Instance;
-            Forward_Equilibrium  : Arrays.Real;
-            Backward_Equilibrium : Arrays.Real;
+            Forward  : Filter.Resource.Instance;
+            Backward : Filter.Resource.Instance;
+            FE, BE   : Arrays.Real;
             case Scheme is
                when Parallel =>
                   null;
@@ -225,5 +225,9 @@ package Iderium.Media.Filter is
          end record;
 
    end Pair;
-   
+
+private
+
+
+
 end Iderium.Media.Filter;

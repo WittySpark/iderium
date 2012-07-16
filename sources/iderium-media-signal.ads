@@ -25,6 +25,13 @@ package Iderium.Media.Signal is
          Sample : Sample_Type;
       end record;
 
+   ---------------------------------------------------------------------
+   -- Capture
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Extracts the next sample from `Signal`, updating its fields.
+   --    Since is abstract, should be overridden.
+   ---------------------------------------------------------------------
    procedure Capture (Signal : in out Instance) is abstract;
 
 end Iderium.Media.Signal;

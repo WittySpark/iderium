@@ -61,7 +61,7 @@ package Iderium.Resource is
 
 private
 
-   -- COUNTER ----------------------------------------------------------
+   -- INSTANCE ---------------------------------------------------------
 
    type Counter is new Positive;
 
@@ -69,8 +69,6 @@ private
 
    procedure Free is 
      new Ada.Unchecked_Deallocation (Counter, Counter_Access);
-
-   -- INSTANCE ---------------------------------------------------------
 
    type Instance is new Ada.Finalization.Controlled with
       record

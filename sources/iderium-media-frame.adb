@@ -2,13 +2,20 @@
 -- Iderium.Media.Filter
 ------------------------------------------------------------------------
 -- Implementation notes:
---    This package allows you to work with linear recursive systems.
+--    
 ------------------------------------------------------------------------
 
 package body Iderium.Media.Frame is
 
+   -- INSTANCE ---------------------------------------------------------
+   
+   ---------------------------------------------------------------------
+   -- Grab
+   ---------------------------------------------------------------------
+   -- Implementation notes:
+   ---------------------------------------------------------------------
    procedure Grab (Input : in out Signal_Type; 
-                     Output : out Instance) is
+                  Output : out Instance) is
    begin
       for I in Output'Range loop
          Capture (Input);
@@ -17,8 +24,14 @@ package body Iderium.Media.Frame is
       end loop;
    end Grab;
 
+   -- BROADCAST --------------------------------------------------------
 
-   procedure Capture (B : in out Broadcast) is
+   ---------------------------------------------------------------------
+   -- Capture
+   ---------------------------------------------------------------------
+   -- Implementation notes:
+   ---------------------------------------------------------------------
+   procedure Capture (Broadcast : in out Instance) is
    begin
       B.Active := B.Current in B.Frame'Range;
       if B.Active then

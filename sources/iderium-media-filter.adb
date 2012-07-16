@@ -94,6 +94,7 @@ package body Iderium.Media.Filter is
 
       use type Arrays.Real;
 
+      -- Computes a sum of all elements of `X`.
       function Sum (X : Arrays.Real_Vector) return Arrays.Real is
          Result : Arrays.Real := 0.0;
       begin
@@ -130,6 +131,9 @@ package body Iderium.Media.Filter is
 
    package body Pair is
 
+      ------------------------------------------------------------------
+      -- Create
+      ------------------------------------------------------------------
       function Create (Scheme : Connection_Scheme;
             Forward, Backward : Filter.Instance) return Instance is
 
@@ -174,11 +178,11 @@ package body Iderium.Media.Filter is
                   Result(I, J) := R(J);
                end loop;
             end loop;
-            
+            -- Safely return `Result`.
             return Matrix_Resource.Create (Result);
          end Reversal;
 
-         Result : Instance (Scheme);
+         Result        : Instance (Scheme);
          Forward_Copy  : Filter.Instance_Access := 
            new Filter.Instance'(Forward);
          Backward_Copy : Filter.Instance_Access := 
@@ -188,16 +192,31 @@ package body Iderium.Media.Filter is
          Result.Backward := Resource.Create (Backward_Copy);
          Result.Forward_Equilibrium  := Equilibrium (Forward);
          Result.Backward_Equilibrium := Equilibrium (Backward);
-         if Scheme = Sequential then
+         if Scheme = Sequential and Forward.N > 0 then
             Result.Reversal := Reversal;
          end if;
          return Result;
       end Create;
 
+      ------------------------------------------------------------------
+      -- Apply
+      ------------------------------------------------------------------
+      -- Implementation notes:
+      ------------------------------------------------------------------
       procedure Apply (Pair : Instance; 
                        Data : in out Frame.Instance) is
+         Forward_Data_Broadcast : Frame.Broadcast (Data, Forward);
+         Forward_Filter : Filter.Instance_Access := 
+           Filter.Resource.Get (Pair.Forward);
+         Forward_Filter_Output : Filter.Output (Forward_Filter,
+                                        Forward_Data_Broadcast);
       begin
-         null;
+         -- Forward pass.
+         Filter.Buffer.Fill (Forward_Filter.I, Data(Data'First));
+         Filter.Buffer.Fill (Forward_Filter.F, 
+           Pair.Forward_Equilibrium * Data(Data'First));
+         loop
+            
       end Apply;
 
    end Pair;
