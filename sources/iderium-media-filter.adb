@@ -9,21 +9,22 @@ package body Iderium.Media.Filter is
 
    -- BUFFER -----------------------------------------------------------
 
-   package body Buffer is
-
-      ------------------------------------------------------------------
-      -- Dot
-      ------------------------------------------------------------------
-      procedure Dot (Vector : Arrays.Real_Vector; 
-                     Buffer : Instance; 
-                     Output : in out Signal.Sample_Type) is
-      begin
-         for I in 1 .. Buffer.Size loop
-            Output := Output + 
-                      Vector(Vector'First + I - 1) * 
-                      Buffer.Data(Buffer.Current + I);
-         end loop;
-      end Dot;
+   ---------------------------------------------------------------------
+   -- Dot
+   ---------------------------------------------------------------------
+   -- Implementation notes:
+   --    .
+   ---------------------------------------------------------------------
+   procedure Dot (Left   : Arrays.Real_Vector; 
+                  Right  : Buffer.Instance; 
+                  Result : in out Frame.Signal.Sample_Type) is
+      Current : Frame.Instance := Buffer.Get (Right);
+   begin
+      for I in Current'Range loop
+         Result := Result + 
+           Vector(Vector'First + I - Current'First) * Current(I);
+      end loop;
+   end Dot;
 
       ------------------------------------------------------------------
       -- Push

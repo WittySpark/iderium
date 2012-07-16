@@ -2,9 +2,9 @@
 -- Iderium.Media.Filter
 ------------------------------------------------------------------------
 -- Purpose:
---    This package allows you to work with linear recursive systems.
+--    This package allows you to work with causal recursive filters.
 -- Concept:
---    A linear recursive system can be decomposed into causal and
+-- TODO   A linear recursive system can be decomposed into causal and
 --    anti-causal parts, which form a filter pair.
 --    Causal filters are used to process infinite signals, and 
 --    filter pairs are used to process finite signal frames.
@@ -31,8 +31,8 @@
 
 with Ada.Numerics.Generic_Real_Arrays;
 with Ada.Unchecked_Deallocation;
+with Iderium.Media.Buffer;
 with Iderium.Media.Frame;
-with Iderium.Media.Signal;
 with Iderium.Resource;
 
 generic
@@ -41,18 +41,19 @@ generic
    with package Arrays is new Ada.Numerics.Generic_Real_Arrays (<>);
 
    -- Also defines a sample type to be used.
-   with package Signal is new Iderium.Media.Signal (<>);
+   with package Frame is new Iderium.Media.Frame (<>);
 
    -- This operator must be defined on samples.
-   with function "*" (Left : Arrays.Real; Right : Signal.Sample_Type)
-     return Signal.Sample_Type is <>;
+   with function "*" (Left : Arrays.Real; 
+                     Right : Frame.Signal.Sample_Type)
+     return Frame.Signal.Sample_Type is <>;
 
    -- This operator must be defined on samples.
-   with function "+" (Left, Right : Signal.Sample_Type)
-     return Signal.Sample_Type is <>;
+   with function "+" (Left, Right : Frame.Signal.Sample_Type)
+     return Frame.Signal.Sample_Type is <>;
 
    -- A concrete input signal type to work with.
-   type Input_Type is new Signal.Instance with private;
+   type Input_Type is new Frame.Signal.Instance with private;
 
    -- The more `Buffer_Capacity` is, the longer `Push` works fast,
    -- and the more memory is used.
@@ -60,86 +61,20 @@ generic
 
 package Iderium.Media.Filter is
 
-   ---------------------------------------------------------------------
    -- BUFFER -----------------------------------------------------------
+
+   package Buffer is new Iderium.Media.Buffer (Frame, Buffer_Capacity);
+
    ---------------------------------------------------------------------
-
-   package Buffer is
-
-      -- INSTANCE ------------------------------------------------------
-
-      -- Can be seen as a vector of length `Size`.
-      type Instance (Size : Natural) is private;
-
-      ------------------------------------------------------------------
-      -- Dot
-      ------------------------------------------------------------------
-      -- Purpose:
-      --    Adds <`Vector`, `Buffer`> to `Output`.
-      ------------------------------------------------------------------
-      procedure Dot (Vector : Arrays.Real_Vector; 
-                     Buffer : Instance; 
-                     Output : in out Signal.Sample_Type);
-      pragma Inline (Dot);
-
-      ------------------------------------------------------------------
-      -- Push
-      ------------------------------------------------------------------
-      -- Purpose:
-      --    Shifts `Buffer` down and puts `Sample` to the first slot.
-      ------------------------------------------------------------------
-      procedure Push (Buffer : in out Instance;
-                      Sample : Signal.Sample_Type);
-      pragma Inline (Push);
-
-      ------------------------------------------------------------------
-      -- Fill
-      ------------------------------------------------------------------
-      -- Purpose:
-      --    Assigns `Sample` to each element of `Buffer`.
-      ------------------------------------------------------------------
-      procedure Fill (Buffer : in out Instance;
-                      Sample : Signal.Sample_Type);
-      pragma Inline (Fill);
-
-      ------------------------------------------------------------------
-      -- Mix
-      ------------------------------------------------------------------
-      -- Purpose:
-      --    Replaces `Buffer` with the following linear combination:
-      --      (1.0 - `Factor`) * `Buffer` + `Factor` * `Sample`.
-      ------------------------------------------------------------------
-      procedure Mix (Buffer : in out Instance; 
-                     Sample : Signal.Sample_Type;
-                     Factor : Arrays.Real);
-      pragma Inline (Mix);
-
-      ------------------------------------------------------------------
-      -- Rotate
-      ------------------------------------------------------------------
-      -- Purpose:
-      --    Multiplies column vector `Buffer` on the left by `Matrix`.
-      ------------------------------------------------------------------
-      procedure Rotate (Buffer : in out Instance; 
-                        Matrix : Arrays.Real_Matrix);
-      pragma Inline (Rotate);
-
-   private
-
-      -- INSTANCE ------------------------------------------------------
-
-      type Buffer_Data is 
-        array (Integer range <>) of Signal.Sample_Type;
-
-      -- `Current` points to the last available slot in `Data`.
-      -- Current buffer is stored in `Data(Current+1..Current+Size)`.
-      type Instance (Size : Natural) is
-         record
-            Data    : Buffer_Data (-Buffer_Capacity + 1 .. Size);
-            Current : Integer := 0;
-         end record;
-
-   end Buffer;
+   -- Dot
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Adds <`Left`, `Right`> to `Result`.
+   ---------------------------------------------------------------------
+   procedure Dot (Left   : Arrays.Real_Vector; 
+                  Right  : Buffer.Instance; 
+                  Result : in out Frame.Signal.Sample_Type);
+   pragma Inline (Dot);
 
    -- INSTANCE ---------------------------------------------------------
 
