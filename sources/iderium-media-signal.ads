@@ -6,9 +6,9 @@
 -- Concept:
 --   A signal is a sequence of samples.
 --   In order to get the next sample of a signal you call `Capture` 
---   procedure. The captured sample then will be stored in `Sample`. 
+--   procedure. The captured sample then is stored in `Sample`. 
 --   If there are no more samples in the signal, then `Active` is set 
---   to `False`. Otherwise, of course, `Active` is set to `True`.
+--   to `false`. Otherwise, of course, `Active` is set to `true`.
 ------------------------------------------------------------------------
 
 generic
@@ -21,7 +21,7 @@ package Iderium.Media.Signal is
 
    type Instance is 
       abstract tagged limited record
-         Active : Boolean := True;
+         Active : Boolean := true;
          Sample : Sample_Type;
       end record;
 
