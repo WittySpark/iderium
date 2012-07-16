@@ -17,16 +17,16 @@ procedure Demo is
    overriding
    procedure Capture (Signal : in out Prime_Signal) is
       -- Let's make some names a bit shorter.
-      N : Positive renames Signal.Sample;
+      -- And we definitely need a flag.
       use Ada.Numerics.Elementary_Functions;
-      -- We definitely need a flag.
+      N     : Positive renames Signal.Sample;
       Prime : Boolean;
    begin
       loop
          -- Go to the next number.
          N := N + 1;
          -- Assume it to be prime.
-         Prime := True;
+         Prime := true;
          -- Check all possible dividers.
          for Divider in 2 .. Positive (Sqrt (Float (N))) loop
             Prime := N rem Divider /= 0;

@@ -22,7 +22,7 @@
 --      (A + \sum_{i=1}^{M} B(i) z^-i) / (1 - \sum_{i=1}^N C(i) z^-i).
 --    A filter pair transforms a signal frame depending on the
 --    connection scheme it uses. There are two connection schemes:
---      - parallel: out := Forward[in] + Backward[out],
+--      - parallel: out := Forward[in] + Backward[in],
 --      - sequential: out := Backward[Forward[in]].
 --    A filter pair assumes a nearest-neighbour extrapolation outside
 --    the input frame and correctly handles a boundary condition when
@@ -60,7 +60,9 @@ generic
 
 package Iderium.Media.Filter is
 
+   ---------------------------------------------------------------------
    -- BUFFER -----------------------------------------------------------
+   ---------------------------------------------------------------------
 
    package Buffer is
 
@@ -157,7 +159,7 @@ package Iderium.Media.Filter is
    --    Returns a real constant R such, that:
    --      R * in = A * in + <B, {in}> + <C, {R * in}>,
    --    where {x} is a vector [x x .. x]'.
-   --    Used in constant signal frame extrapolation.
+   --    Primarily used in constant signal frame extrapolation.
    ---------------------------------------------------------------------
    function Equilibrium (Filter : Instance) return Arrays.Real;
 
@@ -178,7 +180,9 @@ package Iderium.Media.Filter is
    procedure Capture (Filter : in out Output);
    pragma Inline (Capture);
 
+   ---------------------------------------------------------------------
    -- PAIR -------------------------------------------------------------
+   ---------------------------------------------------------------------
 
    package Pair is
 

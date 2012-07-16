@@ -1,3 +1,10 @@
+------------------------------------------------------------------------
+-- Iderium.Media.Filter
+------------------------------------------------------------------------
+-- Implementation notes:
+--    This package allows you to work with linear recursive systems.
+------------------------------------------------------------------------
+
 package body Iderium.Media.Frame is
 
    procedure Grab (Input : in out Signal_Type; 
