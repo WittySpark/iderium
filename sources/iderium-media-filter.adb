@@ -157,7 +157,7 @@ package body Iderium.Media.Filter is
          function Evaluate_Reversal return Matrix_Resource.Instance is
             use Arrays;
             Q : Real_Matrix (1 .. Forward.N, 1 .. Forward.N) :=
-              (others => 0.0);
+              (others => (others => 0.0));
             T : Real_Matrix (1 .. Forward.N, 1 .. Forward.N);
             M : Matrix_Access;
          begin
@@ -168,7 +168,7 @@ package body Iderium.Media.Filter is
                Q(I, I - 1) := 1.0;
             end loop;
             -- Compute `T`.
-            
+            return Matrix_Resource.Create (null);
          end Evaluate_Reversal;
 
          Result : Instance (Scheme);
@@ -184,6 +184,7 @@ package body Iderium.Media.Filter is
          if Scheme = Sequential then
             Result.Reversal := Evaluate_Reversal;
          end if;
+         return Result;
       end Create;
 
       procedure Apply (Pair : Instance; 

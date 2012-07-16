@@ -35,8 +35,6 @@ package Iderium.Resource is
    ---------------------------------------------------------------------
    -- Purpose:
    --    Returns `True` iff the given resource is empty.
-   -- Exceptions:
-   --    None.
    ---------------------------------------------------------------------
    function Void (Resource : Instance) return Boolean;
    pragma Inline (Void);
@@ -46,8 +44,6 @@ package Iderium.Resource is
    ---------------------------------------------------------------------
    -- Purpose:
    --    Creates a new resource storing the given object.
-   -- Exceptions:
-   --    None.
    ---------------------------------------------------------------------
    function Create (Object : Object_Type) return Instance;
    pragma Inline (Create);
