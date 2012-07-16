@@ -76,9 +76,21 @@ private
          Object     : Object_Type;
       end record;
 
+   ---------------------------------------------------------------------
+   -- Adjust
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Controls the number of actual resource users.
+   ---------------------------------------------------------------------
    procedure Adjust (Resource : in out Instance);
    pragma Inline (Adjust);
 
+   ---------------------------------------------------------------------
+   -- Adjust
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Controls the number of actual resource users.
+   ---------------------------------------------------------------------
    procedure Finalize (Resource : in out Instance);
    pragma Inline (Finalize);
 
