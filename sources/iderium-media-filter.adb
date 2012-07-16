@@ -2,8 +2,7 @@
 -- Iderium.Media.Filter
 ------------------------------------------------------------------------
 -- Implementation notes:
---    None.
--- TODO: implement `Rotate` procedure.
+--    TODO: implement `Rotate` procedure.
 ------------------------------------------------------------------------
 
 package body Iderium.Media.Filter is
@@ -14,9 +13,6 @@ package body Iderium.Media.Filter is
 
       ------------------------------------------------------------------
       -- Dot
-      ------------------------------------------------------------------
-      -- Implementation notes:
-      --    None.
       ------------------------------------------------------------------
       procedure Dot (Vector : Arrays.Real_Vector; 
                      Buffer : Instance; 
@@ -31,9 +27,6 @@ package body Iderium.Media.Filter is
 
       ------------------------------------------------------------------
       -- Push
-      ------------------------------------------------------------------
-      -- Implementation notes:
-      --    None.
       ------------------------------------------------------------------
       procedure Push (Buffer : in out Instance;
                       Sample : Signal.Sample_Type) is
@@ -55,9 +48,6 @@ package body Iderium.Media.Filter is
       ------------------------------------------------------------------
       -- Fill
       ------------------------------------------------------------------
-      -- Implementation notes:
-      --    None.
-      ------------------------------------------------------------------
       procedure Fill (Buffer : in out Instance;
                       Sample : Signal.Sample_Type) is
          Current : Integer renames Buffer.Current;
@@ -70,8 +60,7 @@ package body Iderium.Media.Filter is
       -- Mix
       ------------------------------------------------------------------
       -- Implementation notes:
-      --    None.
-      -- TODO: Should we require unary minus operator to be defined?
+      --    TODO: Should we require unary minus operator to be defined?
       ------------------------------------------------------------------
       procedure Mix (Buffer : in out Instance; 
                      Sample : Signal.Sample_Type;
@@ -88,9 +77,6 @@ package body Iderium.Media.Filter is
       ------------------------------------------------------------------
       -- Rotate
       ------------------------------------------------------------------
-      -- Implementation notes:
-      --    None.
-      ------------------------------------------------------------------
       procedure Rotate (Buffer : in out Instance; 
                         Matrix : Arrays.Real_Matrix) is
       begin
@@ -103,9 +89,6 @@ package body Iderium.Media.Filter is
 
    ---------------------------------------------------------------------
    -- Equilibrium
-   ---------------------------------------------------------------------
-   -- Implementation notes:
-   --    None.
    ---------------------------------------------------------------------
    function Equilibrium (Filter : Instance) return Arrays.Real is
 
@@ -129,9 +112,6 @@ package body Iderium.Media.Filter is
    ---------------------------------------------------------------------
    -- Capture
    ---------------------------------------------------------------------
-   -- Implementation notes:
-   --    None.
-   ---------------------------------------------------------------------
    overriding
    procedure Capture (Filter : in out Output) is
    begin
@@ -153,13 +133,17 @@ package body Iderium.Media.Filter is
       function Create (Scheme : Connection_Scheme;
             Forward, Backward : Filter.Instance) return Instance is
 
-         -- Evaluates a reversal matrix.
-         function Evaluate_Reversal return Matrix_Resource.Instance is
+         -- Computes a reversal matrix.
+         function Reversal return Matrix_Resource.Instance is
             use Arrays;
             Q : Real_Matrix (1 .. Forward.N, 1 .. Forward.N) :=
               (others => (others => 0.0));
-            T : Real_Matrix (1 .. Forward.N, 1 .. Forward.N);
-            M : Matrix_Access;
+            P : Real_Matrix (1 .. Forward.N, 1 .. Forward.N);
+            S : Real_Matrix (1 .. Forward.N, 1 .. Forward.N);
+            T : Real_Vector (1 .. Forward.N);
+            R : Real_Vector (1 .. Forward.N);
+            Result : Matrix_Access := 
+              new Real_Matrix (1 .. Backward.N, 1 .. Forward.N);
          begin
             -- Fill `Q`.
             Q(1, 1) := Forward.C(1);
@@ -168,8 +152,31 @@ package body Iderium.Media.Filter is
                Q(I, I - 1) := 1.0;
             end loop;
             -- Compute `T`.
-            return Matrix_Resource.Create (null);
-         end Evaluate_Reversal;
+            T := Backward.A * Unit_Vector (1, Forward.N);
+            P := Unit_Matrix (Forward.N);
+            for I in 1 .. Backward.M loop
+               P := Q * P; -- Q**I
+               for J in 1 .. Forward.N loop
+                  T(J) := T(J) + Backward.B(I) * P(1, J);
+               end loop;
+            end loop;
+            -- Compute `S`.
+            P := Unit_Matrix (Forward.N);
+            for I in 1 .. Backward.N loop
+               P := Q * P; -- Q**I
+               S := S - Backward.C(I) * P;
+            end loop;
+            -- Compute `R` and form `Result`.
+            R := Solve (S, T);
+            for I in 1 .. Backward.N loop
+               R := R * Q;
+               for J in 1 .. Forward.N loop
+                  Result(I, J) := R(J);
+               end loop;
+            end loop;
+            
+            return Matrix_Resource.Create (Result);
+         end Reversal;
 
          Result : Instance (Scheme);
          Forward_Copy  : Filter.Instance_Access := 
@@ -182,7 +189,7 @@ package body Iderium.Media.Filter is
          Result.Forward_Equilibrium  := Equilibrium (Forward);
          Result.Backward_Equilibrium := Equilibrium (Backward);
          if Scheme = Sequential then
-            Result.Reversal := Evaluate_Reversal;
+            Result.Reversal := Reversal;
          end if;
          return Result;
       end Create;
