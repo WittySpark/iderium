@@ -5,7 +5,7 @@
 --    This package handles finite signal parts, called "frames".
 -- Concept:
 --    A frame is a vector of samples which can be grabbed from a signal,
---    as well as broadcasted as a signal. 
+--    as well as broadcasted as a signal (either forward or backward). 
 ------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
@@ -30,8 +30,9 @@ package Iderium.Media.Frame is
    --    Captures `Output'Length` samples from `Input` and stores them
    --    in `Output` frame.
    ---------------------------------------------------------------------
-   procedure Grab (Input : in out Signal.Instance'Class; 
-                  Output : out Instance);
+   generic
+      type Signal_Type is new Signal.Instance with private;
+   procedure Grab (Input : in out Signal_Type; Output : out Instance);
 
    type Instance_Access is access Instance;
 
@@ -46,8 +47,10 @@ package Iderium.Media.Frame is
 
       -- INSTANCE ------------------------------------------------------
 
+      type Direction is (Forward, Backward);
+
       type Instance (Source : not null access Frame.Instance;
-                Start, Step : Integer) is 
+                       Pass : Direction) is 
         new Signal.Instance with private;
 
       ------------------------------------------------------------------

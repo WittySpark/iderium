@@ -1,7 +1,7 @@
 library project Iderium is
    for Library_Name use "iderium";
    for Source_Dirs  use ("sources/**");
-   for Excluded_Source_Files use ("iderium-media-earf.ads", "iderium-media-earf.adb");
+   for Excluded_Source_Files use ("iderium-media-earf.ads", "iderium-media-earf.adb", "iderium-media-filter-pair.ads", "iderium-media-filter-pair.adb");
    for Object_Dir   use "objects";
    for Library_Dir  use "library";
 end Iderium;

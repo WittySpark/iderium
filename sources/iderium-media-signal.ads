@@ -11,6 +11,9 @@
 --   to `false`. Otherwise, of course, `Active` is set to `true`.
 ------------------------------------------------------------------------
 
+with Ada.Unchecked_Deallocation;
+with Iderium.Resource;
+
 generic
 
    type Sample_Type is private;
@@ -21,7 +24,7 @@ package Iderium.Media.Signal is
 
    type Instance is 
       abstract tagged limited record
-         Active : Boolean := true;
+         Active : Boolean;
          Sample : Sample_Type;
       end record;
 
@@ -33,5 +36,12 @@ package Iderium.Media.Signal is
    --    Since is abstract, should be overridden.
    ---------------------------------------------------------------------
    procedure Capture (Signal : in out Instance) is abstract;
+
+   type Instance_Access is access Instance'Class;
+
+   procedure Free is
+     new Ada.Unchecked_Deallocation (Instance'Class, Instance_Access);
+
+   package Resource is new Iderium.Resource (Instance_Access);
 
 end Iderium.Media.Signal;

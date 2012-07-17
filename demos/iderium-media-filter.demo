@@ -32,11 +32,8 @@ procedure Demo is
 
    package Arrays is new Ada.Numerics.Generic_Real_Arrays (Float);
 
-   package Frame is new Iderium.Media.Frame (Signal);
-
    package Simple_Filter is new Iderium.Media.Filter (Arrays => Arrays,
-                                                       Frame => Frame,
-                                                  Input_Type => Wave);
+                                                      Signal => Signal);
 
    procedure Print (S : in out Signal.Instance'Class) is
    begin
