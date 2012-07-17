@@ -25,7 +25,7 @@ procedure Demo is
       loop
          -- Go to the next number.
          N := N + 1;
-         -- Assume it to be prime.
+         -- Assume `N` to be prime.
          Prime := true;
          -- Check all possible dividers.
          for Divider in 2 .. Positive (Sqrt (Float (N))) loop

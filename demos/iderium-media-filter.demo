@@ -1,8 +1,9 @@
-with Ada.Text_IO;
 with Ada.Numerics.Elementary_Functions;
 with Ada.Numerics.Generic_Real_Arrays;
-with Iderium.Media.Signal;
+with Ada.Text_IO;
 with Iderium.Media.Filter;
+with Iderium.Media.Frame;
+with Iderium.Media.Signal;
 
 procedure Demo is
 
@@ -10,7 +11,7 @@ procedure Demo is
    package Signal is
      new Iderium.Media.Signal (Float);
 
-   -- Exponentially fading sine wave.
+   -- Noisy exponentially fading sine wave.
    type Wave is new Signal.Instance with
       record
          X : Float := 0.0;
@@ -24,16 +25,17 @@ procedure Demo is
       W.X := W.X + 0.1;
       W.Active := W.X < 10.0;
       if W.Active then
-         W.Sample := Exp (-0.2 * W.X) * Sin (W.X) + 
-           0.1 * Sin (10.0 * W.X);
+         W.Sample := Exp (-0.2 * W.X) * Sin (W.X) +       -- Original.
+                                  0.1 * Sin (10.0 * W.X); -- Noise.
       end if;
    end Capture;
 
-
    package Arrays is new Ada.Numerics.Generic_Real_Arrays (Float);
 
+   package Frame is new Iderium.Media.Frame (Signal);
+
    package Simple_Filter is new Iderium.Media.Filter (Arrays => Arrays,
-                                                      Signal => Signal,
+                                                       Frame => Frame,
                                                   Input_Type => Wave);
 
    procedure Print (S : in out Signal.Instance'Class) is
@@ -45,26 +47,25 @@ procedure Demo is
       end loop;
    end Print;
 
-
-   Input : aliased Wave;
-
+   -- Should be aliased, because we need to be able to access it.
+   Input   : aliased Wave;
    -- A simple first-order recursive filter:
-   --   out = alpha * in + (1 - alpha) * prev.
-   Alpha : constant := 0.1;
+   --   out = alpha * in + (1 - alpha) * previousOut.
+   Alpha   : constant := 0.1;
    Example : Simple_Filter.Instance_Access := 
      new Simple_Filter.Instance'(M => 0,
                                  N => 1,
                                  A => Alpha,
                                  C => (1 => 1.0 - Alpha),
                             others => <>);
-
    Example_Resource : Simple_Filter.Resource.Instance := 
      Simple_Filter.Resource.Create (Example);
-
-   Example_Output : Simple_Filter.Output (Example, Input'Access);
+   Example_Output   : Simple_Filter.Output (Example, Input'Access);
 
 begin
-   Simple_Filter.Buffer.Fill (Example.I, 0.0);
-   Simple_Filter.Buffer.Fill (Example.F, 0.0);
+   -- Clear the buffers.
+   Simple_Filter.Buffer.Put (Example.I, (1 .. Example.M => 0.0));
+   Simple_Filter.Buffer.Put (Example.F, (1 .. Example.N => 0.0));
+   -- Print the result.
    Print (Example_Output);
 end Demo;

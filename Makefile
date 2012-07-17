@@ -1,9 +1,11 @@
 .PHONY: run check build clean show
 
 run: build
+	@echo 'Running demo...'
 	@./demo > demo.log; less demo.log
 
 check: build
+	@echo 'Checking demo...'
 	@valgrind --leak-check=full ./demo
 
 build:

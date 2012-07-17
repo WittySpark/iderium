@@ -91,9 +91,9 @@ package Iderium.Media.Filter is
    -- Equilibrium
    ---------------------------------------------------------------------
    -- Purpose:
-   --    Returns a real constant R such, that:
-   --      R * in = A * in + <B, {in}> + <C, {R * in}>,
-   --    where {x} is a vector [x x .. x]'.
+   --    Returns a real constant E such, that:
+   --      E = A + <B, {1}> + <C, {E}>,
+   --    where {x} is a vector [x x .. x].
    --    Primarily used in constant signal frame extrapolation.
    ---------------------------------------------------------------------
    function Equilibrium (Filter : Instance) return Arrays.Real;
@@ -109,60 +109,17 @@ package Iderium.Media.Filter is
 
    type Output (Context : not null access Instance;
                   Input : not null access Input_Type) is
-     new Signal.Instance with null record;
+     new Frame.Signal.Instance with null record;
 
+   ---------------------------------------------------------------------
+   -- Capture
+   ---------------------------------------------------------------------
+   -- Purpose:
+   --    Performs one step of the recursive filtering.
+   --    Updates `Filter`'s buffers.
+   ---------------------------------------------------------------------
    overriding
    procedure Capture (Filter : in out Output);
    pragma Inline (Capture);
-
-   ---------------------------------------------------------------------
-   -- PAIR -------------------------------------------------------------
-   ---------------------------------------------------------------------
-
-   package Pair is
-
-      -- INSTANCE ------------------------------------------------------
-
-      type Connection_Scheme is (Parallel, Sequential);
-
-      type Instance (Scheme : Connection_Scheme) is private;
-
-      function Create (Scheme : Connection_Scheme;
-            Forward, Backward : Filter.Instance) return Instance;
-
-      generic
-         with package Frame is new Iderium.Media.Frame (Signal);
-      procedure Apply (Pair : Instance; Data : in out Frame.Instance);
-
-   private
-
-      -- INSTANCE ------------------------------------------------------
-
-      type Matrix_Access is access Arrays.Real_Matrix;
-
-      procedure Free is
-        new Ada.Unchecked_Deallocation (Arrays.Real_Matrix, 
-                                             Matrix_Access);
-
-      package Matrix_Resource is new Iderium.Resource (Matrix_Access);
-
-      type Instance (Scheme : Connection_Scheme) is
-         record
-            Forward  : Filter.Resource.Instance;
-            Backward : Filter.Resource.Instance;
-            FE, BE   : Arrays.Real;
-            case Scheme is
-               when Parallel =>
-                  null;
-               when Sequential =>
-                 Reversal : Matrix_Resource.Instance;
-            end case;
-         end record;
-
-   end Pair;
-
-private
-
-
 
 end Iderium.Media.Filter;
