@@ -82,6 +82,7 @@ private
    -- Purpose:
    --    Controls the number of actual resource users.
    ---------------------------------------------------------------------
+   overriding
    procedure Adjust (Resource : in out Instance);
    pragma Inline (Adjust);
 
@@ -91,6 +92,7 @@ private
    -- Purpose:
    --    Controls the number of actual resource users.
    ---------------------------------------------------------------------
+   overriding
    procedure Finalize (Resource : in out Instance);
    pragma Inline (Finalize);
 

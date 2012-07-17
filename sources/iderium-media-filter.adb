@@ -17,7 +17,7 @@ package body Iderium.Media.Filter is
    ---------------------------------------------------------------------
    procedure Dot (Left   : Arrays.Real_Vector; 
                   Right  : Buffer.Instance; 
-                  Result : in out Frame.Signal.Sample_Type) is
+                  Result : in out Signal.Sample_Type) is
       Current : Frame.Instance := Buffer.Get (Right);
    begin
       for I in Current'Range loop
@@ -63,7 +63,7 @@ package body Iderium.Media.Filter is
    overriding
    procedure Capture (Filter : in out Output) is
    begin
-      Capture (Filter.Input.all);
+      Signal.Capture (Filter.Input.all);
       Filter.Active := Filter.Input.Active;
       if Filter.Active then
          Filter.Sample := Filter.Context.A * Filter.Input.Sample;

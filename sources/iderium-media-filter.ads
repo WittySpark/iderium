@@ -33,6 +33,7 @@ with Ada.Numerics.Generic_Real_Arrays;
 with Ada.Unchecked_Deallocation;
 with Iderium.Media.Buffer;
 with Iderium.Media.Frame;
+with Iderium.Media.Signal;
 with Iderium.Resource;
 
 generic
@@ -41,19 +42,15 @@ generic
    with package Arrays is new Ada.Numerics.Generic_Real_Arrays (<>);
 
    -- Also defines a sample type to be used.
-   with package Frame is new Iderium.Media.Frame (<>);
+   with package Signal is new Iderium.Media.Signal (<>);
 
    -- This operator must be defined on samples.
-   with function "*" (Left : Arrays.Real; 
-                     Right : Frame.Signal.Sample_Type)
-     return Frame.Signal.Sample_Type is <>;
+   with function "*" (Left : Arrays.Real; Right : Signal.Sample_Type)
+     return Signal.Sample_Type is <>;
 
    -- This operator must be defined on samples.
-   with function "+" (Left, Right : Frame.Signal.Sample_Type)
-     return Frame.Signal.Sample_Type is <>;
-
-   -- A concrete input signal type to work with.
-   type Input_Type is new Frame.Signal.Instance with private;
+   with function "+" (Left, Right : Signal.Sample_Type)
+     return Signal.Sample_Type is <>;
 
    -- The more `Buffer_Capacity` is, the longer `Push` works fast,
    -- and the more memory is used.
@@ -62,6 +59,8 @@ generic
 package Iderium.Media.Filter is
 
    -- BUFFER -----------------------------------------------------------
+
+   package Frame is new Iderium.Media.Frame (Signal);
 
    package Buffer is new Iderium.Media.Buffer (Frame, Buffer_Capacity);
 
@@ -73,7 +72,7 @@ package Iderium.Media.Filter is
    ---------------------------------------------------------------------
    procedure Dot (Left   : Arrays.Real_Vector; 
                   Right  : Buffer.Instance; 
-                  Result : in out Frame.Signal.Sample_Type);
+                  Result : in out Signal.Sample_Type);
    pragma Inline (Dot);
 
    -- INSTANCE ---------------------------------------------------------
@@ -108,8 +107,8 @@ package Iderium.Media.Filter is
    -- OUTPUT -----------------------------------------------------------
 
    type Output (Context : not null access Instance;
-                  Input : not null access Input_Type) is
-     new Frame.Signal.Instance with null record;
+                  Input : not null access Signal.Instance'Class) is
+     new Signal.Instance with null record;
 
    ---------------------------------------------------------------------
    -- Capture
